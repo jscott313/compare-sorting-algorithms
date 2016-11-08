@@ -8,10 +8,11 @@ namespace PsetS3
         const string a = "ascending";
         const string d = "descending";
         const string r = "random";
-        
+
         const string B = "Bubble";
         const string S = "Selection";
         const string I = "Insertion";
+        const string Q = "Quick";
         const string A = "All";
 
         // Variables required to count the number of operations
@@ -24,7 +25,7 @@ namespace PsetS3
         static ulong totalSwapsBubble = 0;
         static ulong averageSwapsBubble = 0;
         // Selection:
-        static ulong countComparisonsSelection = 0; 
+        static ulong countComparisonsSelection = 0;
         static ulong totalComparisonsSelection = 0;
         static ulong averageComparisonsSelection = 0;
         static ulong countSwapsSelection = 0;
@@ -46,17 +47,17 @@ namespace PsetS3
             /*
              * Edit these variables to set up!
              */
-            string sortingAlgorithm = A;    // B/S/I/A
+            string sortingAlgorithm = Q;    // B/S/I/Q/A
             string orderOfArray = r;        // a/d/r
-            ulong numberOfSorts = 10;
-            int lengthOfArray = 10;
+            ulong numberOfSorts = 1;
+            int lengthOfArray = 50;
             bool printUpdates = true;
-            
-            Console.WriteLine("Sorting algorithm: {0}\nResults of {1} passes of {2}-int {3} arrays:\n", 
+
+            Console.WriteLine("Sorting algorithm: {0}\nResults of {1} passes of {2}-int {3} arrays:\n",
                 sortingAlgorithm, numberOfSorts, lengthOfArray, orderOfArray);
-            
+
             /* Initialise specified number of arrays of ints
-             * Pass each one to Bubble||Selection||Insertion sort
+             * Pass each one to Bubble||Selection||Insertion||Quick sort
              * Count total number of comparisons/swaps/shuffles/insertions as required
              */
             for (int i = 0; i < (int)numberOfSorts; i++)
@@ -67,7 +68,7 @@ namespace PsetS3
                 // Create array
                 int[] array = MakeArray(lengthOfArray, orderOfArray);
 
-                // Call Bubble||Selection||Insertion sort, and add correct variables
+                // Call Bubble||Selection||Insertion||Quick sort, and add correct variables
                 if (sortingAlgorithm == B)
                 {
                     BubbleSort(array, printUpdates, out countComparisonsBubble, out countSwapsBubble);
@@ -87,7 +88,11 @@ namespace PsetS3
                     totalShuffles += countShuffles;
                     totalInsertions += countInsertions;
                 }
-                else if (sortingAlgorithm == A)
+                else if (sortingAlgorithm == Q)                                                                                                     // ADD COUNTING STUFF HERE TOO
+                {
+                    QuickSort(array, 0, array.Length - 1, printUpdates);
+                }
+                else if (sortingAlgorithm == A)                                                                                                     // ADD QUICKSORT HERE AFTER
                 {
                     // Copy each array (since they're arrays of ints, shallow copy is enough)
                     int[] array1 = (int[])array.Clone();
@@ -120,6 +125,44 @@ namespace PsetS3
             DisplayResults(sortingAlgorithm, numberOfSorts, printUpdates);
 
             Console.ReadKey();
+        }
+
+        private static void QuickSort(int[] array, int start, int end, bool printUpdates)                   // ##################################################################################################################
+        {
+            // Base case
+            if (start >= end)
+                return;
+
+            // Calling partition
+            int partitionIndex = Partition(array, start, end, printUpdates);
+            QuickSort(array, start, partitionIndex - 1, printUpdates); // Left side
+            QuickSort(array, partitionIndex + 1, end, printUpdates); // Right side
+
+            //PrintArray(array, "");
+        }
+
+        private static int Partition(int[] array, int start, int end, bool printUpdates)                        // ##################################################################################################################
+        {
+            // Set pivot to end and partitionIndex to start
+            int pivot = array[end];
+            int partitionIndex = start;
+
+            // Iterate from start to end
+            for (int i = start; i < end; i++)
+            {
+                // Put elements smaller than the pivot left of the partition
+                if (array[i] <= pivot)
+                {
+                    Swap(array, i, partitionIndex);
+                    partitionIndex++;
+                }
+            }
+            // Move the pivot to the partition
+            Swap(array, end, partitionIndex);
+
+            string message = "Partition was " + array[partitionIndex].ToString();
+            PrintArray(array, message);
+            return partitionIndex;
         }
 
         /* Returns an array of specified length.
@@ -257,7 +300,7 @@ namespace PsetS3
                     // Since the next line will compare elements, add 1 to comparisons
                     comparisons++;
                     if (printUpdates)
-                        Console.WriteLine("^ Compare " + min.ToString().PadLeft(2) + 
+                        Console.WriteLine("^ Compare " + min.ToString().PadLeft(2) +
                             " with " + array[currentIndex].ToString().PadLeft(2));
                     if (array[currentIndex] < min)
                     {
@@ -349,7 +392,7 @@ namespace PsetS3
                     }
                 }
 
-                if(printUpdates && !endReached)
+                if (printUpdates && !endReached)
                 {
                     Console.WriteLine(", it's not smaller so we insert {0} here:", currentElement.ToString().PadLeft(2));
                 }
